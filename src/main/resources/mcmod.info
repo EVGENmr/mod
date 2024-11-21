@@ -1,0 +1,16 @@
+[
+{
+  "modid": "litium",
+  "name": "litium core",
+  "description": "Example placeholder mod.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["EVGENmr"],
+  "credits": "Fix mod",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
