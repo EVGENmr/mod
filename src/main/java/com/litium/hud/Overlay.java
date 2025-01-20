@@ -1,13 +1,11 @@
 package com.litium.hud;
 
-import com.litium.common.SimplePacket;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 
 import net.minecraft.client.renderer.GlStateManager;
 
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.Potion;
 
 import net.minecraft.util.ResourceLocation;
@@ -17,31 +15,63 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Objects;
 
-public class Overlay extends SimplePacket {
+public class Overlay {
     private final Minecraft mc = Minecraft.getMinecraft();
-
+    double maskCount;
+    int mask;
+    boolean target;
     @SubscribeEvent
     public void onOverlayPre(RenderGameOverlayEvent.Pre event) {
-        if (event.getType() == RenderGameOverlayEvent.ElementType.ARMOR || event.getType() == RenderGameOverlayEvent.ElementType.AIR || event.getType() == RenderGameOverlayEvent.ElementType.FOOD || event.getType() == RenderGameOverlayEvent.ElementType.HEALTH) {
+        if (event.getType() == RenderGameOverlayEvent.ElementType.ARMOR || event.getType() == RenderGameOverlayEvent.ElementType.AIR || event.getType() == RenderGameOverlayEvent.ElementType.FOOD || event.getType() == RenderGameOverlayEvent.ElementType.HEALTH || event.getType() == RenderGameOverlayEvent.ElementType.EXPERIENCE
+        || event.getType() == RenderGameOverlayEvent.ElementType.HEALTHMOUNT || event.getType() == RenderGameOverlayEvent.ElementType.POTION_ICONS) {
             event.setCanceled(true);
         }
     }
+    //public void updateFromPacket(ByteBuf buf) {
+      //  maskCount = buf.readDouble();
+      //  mask = buf.readInt();
+     //   target = buf.readBoolean();
+        //message player;
+        //message.getEntityData().getDouble("maskCount")
+    //}
+   /* public void checkNbt(EntityPlayer player) {
+        double maskCount;
+        int mask;
+        boolean target;
+         maskCount = buf().readDouble();
+        mask = buf().readInt();
+        target = buf().readBoolean();
+
+    }*/
 
     @SubscribeEvent//(priority = EventPriority.NORMAL)
-    public void RenderHp(RenderGameOverlayEvent.Post event) {
+    public void Render(RenderGameOverlayEvent.Post event) {
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
             //EntityPlayerSP player = this.mc.player;
             EntityPlayer player = this.mc.player;
+            maskCount = player.getEntityData().getDouble("maskCount");
+            mask = player.getEntityData().getInteger("mask");
+            target = player.getEntityData().getBoolean("target");
 
 
             int w = event.getResolution().getScaledWidth();
             int h = event.getResolution().getScaledHeight();
 
+            if (this.mc.playerController.isSpectator()) {
+                return;
+            }
+            try {
+                //checkNbt(player);
+                //updateFromPacket(this.getData());
+            } catch (Exception e) {
+                //throw new RuntimeException(e);
+            }
+
             GlStateManager.pushMatrix();
             //GlStateManager.translate(0, 0, 0);
             GlStateManager.enableBlend();
             GlStateManager.enableAlpha();
-            GlStateManager.depthMask(true);
+            //GlStateManager.depthMask(true);
             GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             //GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("litium:textures/util.png"));
@@ -59,7 +89,7 @@ public class Overlay extends SimplePacket {
             if (player.hurtTime > 0 && player.hurtTime < 3) {
                 Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture(w1, h1, 42, sizeHealth, sizeHealth, sizeHealth, 256, 256);
             }
-           if (mc.player.isPotionActive(Objects.requireNonNull(Potion.getPotionFromResourceLocation("wither")))) {
+            if (mc.player.isPotionActive(Objects.requireNonNull(Potion.getPotionFromResourceLocation("wither")))) {
                 Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture(w1, h1 + sizeHealth - offsetHpY, 108, sizeHealth - offsetHpY, sizeHealth, offsetHpY, 256, 256);
             } else if (mc.player.isPotionActive(Objects.requireNonNull(Potion.getPotionFromResourceLocation("poison")))) {
                 Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture(w1, h1 + sizeHealth - offsetHpY, 86, sizeHealth - offsetHpY, sizeHealth, offsetHpY, 256, 256);
@@ -84,42 +114,42 @@ public class Overlay extends SimplePacket {
             Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) - 42, (h / 2), 0, 84, 42, 42, 256, 256);
             Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) - 42 + 4, (h / 2) + 34 - offsetFoodY + 4, 42, 88 + 34 - offsetFoodY, 34, offsetFoodY, 256, 256);
 
-    if (player.isInsideOfMaterial(Material.WATER)) {
-        float Air = (float) player.getAir() / 300;
+            if (player.isInsideOfMaterial(Material.WATER)) {
+                float Air = (float) player.getAir() / 300;
 
-        offsetAirY = (int) Math.round(Air * 34);
-        Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8), (h / 2) - 42, 0, 84, 42, 42, 256, 256);
-        Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) + 4, (h / 2) - 42 + 34 - offsetAirY + 4, 42, 130 + 34 - offsetAirY, 34, offsetAirY, 256, 256);
-    }
-    else {
-        Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8), (h / 2) - 42, 0, 210, 42, 42, 256, 256);
-    }
+                offsetAirY = (int) Math.round(Air * 34);
+                Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8), (h / 2) - 42, 0, 84, 42, 42, 256, 256);
+                Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) + 4, (h / 2) - 42 + 34 - offsetAirY + 4, 42, 130 + 34 - offsetAirY, 34, offsetAirY, 256, 256);
+            }
+            else {
+                Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8), (h / 2) - 42, 0, 210, 42, 42, 256, 256);
+            }
 
             Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) - 42, (h / 2) - 42, 0, 42, 42, 42, 256, 256);
-        if (player.getEntityData().getBoolean("target")) {
-            Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) - 42 + 12, (h / 2) + 12 - 42, 42, 46, 18, 18, 256, 256);
-        }
+            if (target /*player.getEntityData().getBoolean("target")*/) {
+                Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) - 42 + 12, (h / 2) + 12 - 42, 42, 46, 18, 18, 256, 256);
+            }
 
-            if (player.getEntityData().getInteger("mask") > 0) {
+            if (mask /*player.getEntityData().getInteger("mask")*/ > 0) {
                 Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8), (h / 2) + 42, 0, 168, 42, 42, 256, 256);
-                switch (player.getEntityData().getInteger("mask")) {
+                switch (mask /*player.getEntityData().getInteger("mask")*/) {
                     case 1: Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) + 8, (h / 2) + 6 + 42, 127, 172, 26, 18, 256, 256);
-                    break;
+                        break;
                     case 2: Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) + 8, (h / 2) + 6 + 42, 99, 172, 26, 18, 256, 256);
-                    break;
+                        break;
                     case 3: Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) + 8, (h / 2) + 6 + 42, 71, 172, 26, 18, 256, 256);
-                    break;
+                        break;
                     default: Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) + 8, (h / 2) + 6 + 42, 43, 172, 26, 18, 256, 256);
                 }
             }
             else {
                 Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8), (h / 2) + 42, 0, 210, 42, 42, 256, 256);
             }
-
-            GlStateManager.depthMask(false);
-            GlStateManager.disableDepth();
+            Minecraft.getMinecraft().ingameGUI.drawModalRectWithCustomSizedTexture((w / 8) - 42, (h / 2) + 42, 0, 210, 42, 42, 256, 256);
+            //GlStateManager.depthMask(false);
+            //GlStateManager.disableDepth();
             GlStateManager.disableAlpha();
-            //GlStateManager.disableBlend();
+            GlStateManager.disableBlend();
             //GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager.popMatrix();
         }
